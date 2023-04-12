@@ -1,26 +1,36 @@
+import { useState, useEffect } from "react";
+import { Outlet } from "react-router-dom";
+import Footer from "./components/footer/Footer";
+import Header from "./components/header/Header";
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
 
 function App() {
+  const [addedProducts, setAddedProducts] = useState<{ [key: string]: number }>(
+    {}
+  );
+  const getProdsToAdd = (id: number, price: number): void => {
+    setAddedProducts({ ...addedProducts, [String(id)]: price });
+  };
+
+  useEffect(() => {
+    if (localStorage.getItem("products")) {
+      const vals = JSON.parse(localStorage.getItem("products") as string);
+      setAddedProducts({ ...addedProducts, ...vals });
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("products", JSON.stringify(addedProducts));
+  }, [addedProducts]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Header addedProducts={addedProducts} />
+      <Outlet context={{ getProdsToAdd, setAddedProducts, addedProducts }} />
+      <Footer />
+    </>
   );
 }
 
 export default App;
+
